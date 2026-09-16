@@ -28,10 +28,12 @@ venv.bak/
 .DS_Store
 Thumbs.db
 
-# Data & Logs (Optional - customize based on your needs)
+# Data & Logs (raw/processed data shouldn't be committed — too large / regenerable)
 *.log
-*.csv
-*.json
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
 
 # Python build artifacts / packaging
 dist/
@@ -49,5 +51,10 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
-# uv cache (not the lockfile — see note below)
+# uv cache (not the lockfile — uv.lock SHOULD be committed)
 .uv_cache/
+.uv/
+
+# Docker / Airflow
+airflow.db
+*.pid
