@@ -24,7 +24,7 @@ CLEAN_CSV_PATH = "/opt/airflow/data/processed/superstore_clean.csv"
 @dag(
     dag_id="datastore360_pipeline",
     description="Extract, clean, and load data into staging/core",
-    schedule=None,          # manually triggered, not on a recurring schedule
+    schedule=None,
     start_date=datetime(2026, 9, 1),
     catchup=False,
     tags=["datastore360"],
@@ -33,15 +33,13 @@ def datastore360_pipeline():
 
     @task
     def extract_and_load_staging():
-        """Load the raw CSV and push it, untouched, into staging.superstore_raw."""
         engine = get_engine()
         raw_df = load_raw_csv(RAW_CSV_PATH)
         load_to_staging(raw_df, engine)
-        return RAW_CSV_PATH  # passed to the next task via XCom
+        return RAW_CSV_PATH 
 
     @task
     def clean_data(raw_csv_path: str):
-        """Run the full cleaning pipeline and save the result to data/processed/."""
         df = pd.read_csv(raw_csv_path)
 
         df = normalize_text_columns(df)
@@ -64,7 +62,6 @@ def datastore360_pipeline():
 
     @task
     def load_core_tables(clean_csv_path: str):
-        """Load the cleaned data into core.customers, core.products, core.orders."""
         engine = get_engine()
         df = pd.read_csv(clean_csv_path)
 
@@ -73,7 +70,6 @@ def datastore360_pipeline():
         load_products(df, engine)
         load_orders(df, engine)
 
-    # --- Task dependencies ---
     raw_path = extract_and_load_staging()
     clean_path = clean_data(raw_path)
     load_core_tables(clean_path)
