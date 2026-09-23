@@ -158,3 +158,4 @@ def add_profit_margin(df):
     df['Profit Margin'] = df['Profit'] / df['Sales'].replace(0, pd.NA)
     
     return df
+

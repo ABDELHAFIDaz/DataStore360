@@ -27,7 +27,6 @@ CLEAN_CSV_PATH = "/opt/airflow/data/processed/superstore_clean.csv"
     schedule=None,
     start_date=datetime(2026, 9, 1),
     catchup=False,
-    tags=["datastore360"],
 )
 def datastore360_pipeline():
 
@@ -39,7 +38,7 @@ def datastore360_pipeline():
         return RAW_CSV_PATH 
 
     @task
-    def clean_data(raw_csv_path: str):
+    def clean_data(raw_csv_path):
         df = pd.read_csv(raw_csv_path)
 
         df = normalize_text_columns(df)
@@ -58,10 +57,10 @@ def datastore360_pipeline():
         df = hash_customer_name(df)
 
         df.to_csv(CLEAN_CSV_PATH, index=False)
-        return CLEAN_CSV_PATH  # passed to the next task via XCom
+        return CLEAN_CSV_PATH
 
     @task
-    def load_core_tables(clean_csv_path: str):
+    def load_core_tables(clean_csv_path):
         engine = get_engine()
         df = pd.read_csv(clean_csv_path)
 
@@ -70,9 +69,7 @@ def datastore360_pipeline():
         load_products(df, engine)
         load_orders(df, engine)
 
-    raw_path = extract_and_load_staging()
-    clean_path = clean_data(raw_path)
-    load_core_tables(clean_path)
+    load_core_tables(clean_data(extract_and_load_staging()))
 
 
 datastore360_pipeline()
